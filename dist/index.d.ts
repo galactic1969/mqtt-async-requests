@@ -10,7 +10,6 @@ export interface IfMqttRequest {
         payload?: string | Buffer;
         qos?: 0 | 1 | 2;
     };
-    isRequesting: boolean;
     do(topic: string, appendUuid: boolean, responseTopicSuffix: string, payload: string | Buffer, qos: 0 | 1 | 2, requestTimeoutMilliseconds: number): Promise<Buffer>;
 }
 declare class BaseError extends Error {
@@ -32,8 +31,8 @@ export declare class MqttRequest implements IfMqttRequest {
         payload?: string | Buffer;
         qos?: 0 | 1 | 2;
     };
-    isRequesting: boolean;
-    constructor(connectOptions: Mqtt.IClientOptions, certPath?: string, keyPath?: string);
+    private isRequesting;
+    constructor(connectOptions: Mqtt.IClientOptions);
     private setTimeout;
     do(topic: string, appendUuid: boolean, responseTopicSuffix: string, payload: string | Buffer, qos: 0 | 1 | 2, requestTimeoutMilliseconds: number): Promise<Buffer>;
 }

@@ -11,7 +11,6 @@ export interface IfMqttRequest {
     payload?: string | Buffer;
     qos?: 0 | 1 | 2;
   };
-  isRequesting: boolean;
   do(
     topic: string,
     appendUuid: boolean,
@@ -44,14 +43,9 @@ export class MqttRequest implements IfMqttRequest {
     payload?: string | Buffer;
     qos?: 0 | 1 | 2;
   } = {};
-  isRequesting = false;
+  private isRequesting = false;
 
-  constructor(connectOptions: Mqtt.IClientOptions, certPath?: string, keyPath?: string) {
-    if (connectOptions.protocol == 'mqtts') {
-      if (certPath === undefined || keyPath === undefined) {
-        throw new Error('in mqtts protocol, certPath and keyPath are required');
-      }
-    }
+  constructor(connectOptions: Mqtt.IClientOptions) {
     this.connectOptions = connectOptions;
   }
 

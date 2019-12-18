@@ -26,15 +26,10 @@ class ParallelRequestingError extends BaseError {
 }
 exports.ParallelRequestingError = ParallelRequestingError;
 class MqttRequest {
-    constructor(connectOptions, certPath, keyPath) {
+    constructor(connectOptions) {
         this.client = null;
         this.requestParams = {};
         this.isRequesting = false;
-        if (connectOptions.protocol == 'mqtts') {
-            if (certPath === undefined || keyPath === undefined) {
-                throw new Error('in mqtts protocol, certPath and keyPath are required');
-            }
-        }
         this.connectOptions = connectOptions;
     }
     setTimeout(msec) {
