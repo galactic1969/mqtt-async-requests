@@ -1,0 +1,24 @@
+{
+  "name": "mqtt-async-requests",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "rm -rf dist; tsc;"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "mqtt": "^3.0.0",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.8",
+    "@types/uuid": "^3.4.6",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "^6.6.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.3"
+  }
+}
