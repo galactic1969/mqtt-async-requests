@@ -128,7 +128,7 @@ export class MqttRequest implements IfMqttRequest {
     this.isRequesting = false;
 
     if (response !== null) {
-      return response;
+      return response as Buffer;
     } else {
       throw new ResponseTimeoutError();
     }
