@@ -66,7 +66,7 @@ class MqttRequest {
             responseTopicSuffix[0] === '/' ? responseTopicSuffix.slice(1) : responseTopicSuffix;
         this.requestParams.qos = qos;
         this.requestParams.payload = payload;
-        let response = null;
+        let response = new Buffer('');
         const responseTopic = `${this.requestParams.topic}/${this.requestParams.responseTopicSuffix}`;
         const timer = this.setTimeout(requestTimeoutMilliseconds);
         this.client = Mqtt.connect(this.connectOptions);
@@ -90,7 +90,7 @@ class MqttRequest {
         await timer.exec();
         this.client.end();
         this.isRequesting = false;
-        if (response !== null) {
+        if (response.length > 0) {
             return response;
         }
         else {

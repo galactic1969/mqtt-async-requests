@@ -95,7 +95,7 @@ export class MqttRequest implements IfMqttRequest {
     this.requestParams.qos = qos;
     this.requestParams.payload = payload;
 
-    let response: Buffer | null = null;
+    let response: Buffer = new Buffer('');
     const responseTopic = `${this.requestParams.topic!}/${this.requestParams.responseTopicSuffix!}`;
     const timer = this.setTimeout(requestTimeoutMilliseconds);
 
@@ -127,8 +127,8 @@ export class MqttRequest implements IfMqttRequest {
     this.client.end();
     this.isRequesting = false;
 
-    if (response !== null) {
-      return response as Buffer;
+    if (response.length > 0) {
+      return response;
     } else {
       throw new ResponseTimeoutError();
     }
