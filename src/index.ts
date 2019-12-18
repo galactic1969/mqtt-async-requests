@@ -1,7 +1,7 @@
 import * as Mqtt from 'mqtt';
 import * as uuid from 'uuid';
 
-interface IfMqttRequest {
+export interface IfMqttRequest {
   client: Mqtt.Client | null;
   connectOptions: Mqtt.IClientOptions;
   requestParams: {
@@ -30,11 +30,11 @@ class BaseError extends Error {
   }
 }
 
-class TimeoutCancelledBeforeExecution extends BaseError {}
-class ResponseTimeoutError extends BaseError {}
-class ParallelRequestingError extends BaseError {}
+export class TimeoutCancelledBeforeExecution extends BaseError {}
+export class ResponseTimeoutError extends BaseError {}
+export class ParallelRequestingError extends BaseError {}
 
-class MqttRequest implements IfMqttRequest {
+export class MqttRequest implements IfMqttRequest {
   client: Mqtt.Client | null = null;
   connectOptions: Mqtt.IClientOptions;
   requestParams: {
@@ -140,5 +140,3 @@ class MqttRequest implements IfMqttRequest {
     }
   }
 }
-
-export default MqttRequest;

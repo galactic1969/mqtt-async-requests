@@ -18,10 +18,13 @@ class BaseError extends Error {
 }
 class TimeoutCancelledBeforeExecution extends BaseError {
 }
+exports.TimeoutCancelledBeforeExecution = TimeoutCancelledBeforeExecution;
 class ResponseTimeoutError extends BaseError {
 }
+exports.ResponseTimeoutError = ResponseTimeoutError;
 class ParallelRequestingError extends BaseError {
 }
+exports.ParallelRequestingError = ParallelRequestingError;
 class MqttRequest {
     constructor(connectOptions, certPath, keyPath) {
         this.client = null;
@@ -100,5 +103,5 @@ class MqttRequest {
         }
     }
 }
-exports.default = MqttRequest;
+exports.MqttRequest = MqttRequest;
 //# sourceMappingURL=index.js.map
