@@ -19,16 +19,21 @@ class BaseError extends Error {
 class TimeoutCancelledBeforeExecution extends BaseError {
 }
 exports.TimeoutCancelledBeforeExecution = TimeoutCancelledBeforeExecution;
+class ConnectionError extends BaseError {
+}
+exports.ConnectionError = ConnectionError;
 class ResponseTimeoutError extends BaseError {
 }
 exports.ResponseTimeoutError = ResponseTimeoutError;
 class ParallelRequestingError extends BaseError {
 }
 exports.ParallelRequestingError = ParallelRequestingError;
+class ParameterError extends BaseError {
+}
+exports.ParameterError = ParameterError;
 class MqttRequest {
     constructor(connectOptions) {
         this.client = null;
-        this.requestParams = {};
         this.isRequesting = false;
         this.connectOptions = connectOptions;
     }
@@ -60,24 +65,20 @@ class MqttRequest {
         if (this.isRequesting === true)
             throw new ParallelRequestingError('create instance each request or request sequentially');
         this.isRequesting = true;
-        this.requestParams.topic = appendUuid === true ? `${topic}/${uuid.v4()}` : topic;
-        this.requestParams.appendUuid = appendUuid;
-        this.requestParams.responseTopicSuffix =
-            responseTopicSuffix[0] === '/' ? responseTopicSuffix.slice(1) : responseTopicSuffix;
-        this.requestParams.qos = qos;
-        this.requestParams.payload = payload;
+        const requestTopic = appendUuid === true ? `${topic}/${uuid.v4()}` : topic;
+        const resSuffix = responseTopicSuffix[0] === '/' ? responseTopicSuffix.slice(1) : responseTopicSuffix;
+        const responseTopic = `${requestTopic}/${resSuffix}`;
         let response = new Buffer('');
-        const responseTopic = `${this.requestParams.topic}/${this.requestParams.responseTopicSuffix}`;
         const timer = this.setTimeout(requestTimeoutMilliseconds);
         this.client = Mqtt.connect(this.connectOptions);
         this.client.on('connect', () => {
             this.client.subscribe(responseTopic, {
-                qos: this.requestParams.qos
+                qos: qos
             }, err => {
                 if (err)
-                    new Error('connection failed');
-                this.client.publish(this.requestParams.topic, this.requestParams.payload, {
-                    qos: this.requestParams.qos
+                    new ConnectionError();
+                this.client.publish(requestTopic, payload, {
+                    qos: qos
                 });
             });
         });
@@ -92,6 +93,59 @@ class MqttRequest {
         this.isRequesting = false;
         if (response.length > 0) {
             return response;
+        }
+        else {
+            throw new ResponseTimeoutError();
+        }
+    }
+    async doMany(topics, appendUuid, responseTopicSuffix, payloads, qos, requestTimeoutMilliseconds) {
+        if (this.isRequesting === true)
+            throw new ParallelRequestingError('create instance each request or request sequentially');
+        if (topics.length !== payloads.length)
+            throw new ParameterError('array length unmatch between topics and payloads');
+        this.isRequesting = true;
+        const requestTopics = topics.map(topic => {
+            return appendUuid === true ? `${topic}/${uuid.v4()}` : topic;
+        });
+        const resSuffix = responseTopicSuffix[0] === '/' ? responseTopicSuffix.slice(1) : responseTopicSuffix;
+        const responseTopics = requestTopics.map(requestTopic => {
+            return `${requestTopic}/${resSuffix}`;
+        });
+        const responsesMap = {};
+        const responses = [];
+        const requestCounts = topics.length;
+        const timer = this.setTimeout(requestTimeoutMilliseconds);
+        this.client = Mqtt.connect(this.connectOptions);
+        this.client.on('connect', () => {
+            this.client.subscribe('#', {
+                qos: qos
+            }, err => {
+                if (err)
+                    new ConnectionError();
+                requestTopics.forEach((requestTopic, index) => {
+                    this.client.publish(requestTopic, payloads[index], {
+                        qos: qos
+                    });
+                });
+            });
+        });
+        this.client.on('message', (topic, payload) => {
+            const foundIndex = responseTopics.findIndex(item => item === topic);
+            if (foundIndex !== -1) {
+                responsesMap[foundIndex.toString()] = payload;
+                if (Object.keys(responsesMap).length === requestCounts) {
+                    Object.keys(responsesMap).forEach(indexString => {
+                        responses[parseInt(indexString)] = responsesMap[indexString];
+                    });
+                    timer.cancel();
+                }
+            }
+        });
+        await timer.exec();
+        this.client.end();
+        this.isRequesting = false;
+        if (responses.length > 0) {
+            return responses;
         }
         else {
             throw new ResponseTimeoutError();
