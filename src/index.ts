@@ -80,11 +80,13 @@ export class MqttRequest implements IfMqttRequest {
       })
     );
 
+    const timer = this.setTimeout(connectionTimeoutMilliseconds);
+
     this.client.on('connect', () => {
       this.client?.end();
+      timer.cancel();
     });
 
-    const timer = this.setTimeout(connectionTimeoutMilliseconds);
     await timer.exec();
 
     if (!this.client.disconnected) this.client.end();

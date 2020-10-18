@@ -65,11 +65,12 @@ class MqttRequest {
         this.client = Mqtt.connect(Object.assign(this.connectOptions, {
             connectTimeout: connectionTimeoutMilliseconds
         }));
+        const timer = this.setTimeout(connectionTimeoutMilliseconds);
         this.client.on('connect', () => {
             var _a;
             (_a = this.client) === null || _a === void 0 ? void 0 : _a.end();
+            timer.cancel();
         });
-        const timer = this.setTimeout(connectionTimeoutMilliseconds);
         await timer.exec();
         if (!this.client.disconnected)
             this.client.end();
