@@ -61,6 +61,19 @@ class MqttRequest {
             }
         };
     }
+    async pingConnection(connectionTimeoutMilliseconds) {
+        this.client = Mqtt.connect(Object.assign(this.connectOptions, {
+            connectTimeout: connectionTimeoutMilliseconds
+        }));
+        this.client.on('connect', () => {
+            var _a;
+            (_a = this.client) === null || _a === void 0 ? void 0 : _a.end();
+        });
+        const timer = this.setTimeout(connectionTimeoutMilliseconds);
+        await timer.exec();
+        if (!this.client.disconnected)
+            this.client.end();
+    }
     async do(topic, appendUuid, responseTopicSuffix, payload, qos, requestTimeoutMilliseconds) {
         if (this.isRequesting === true)
             throw new ParallelRequestingError('create instance each request or request sequentially');

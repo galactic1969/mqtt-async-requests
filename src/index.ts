@@ -73,6 +73,23 @@ export class MqttRequest implements IfMqttRequest {
     };
   }
 
+  async pingConnection(connectionTimeoutMilliseconds: number): Promise<void> {
+    this.client = Mqtt.connect(
+      Object.assign(this.connectOptions, {
+        connectTimeout: connectionTimeoutMilliseconds
+      })
+    );
+
+    this.client.on('connect', () => {
+      this.client?.end();
+    });
+
+    const timer = this.setTimeout(connectionTimeoutMilliseconds);
+    await timer.exec();
+
+    if (!this.client.disconnected) this.client.end();
+  }
+
   async do(
     topic: string,
     appendUuid: boolean,

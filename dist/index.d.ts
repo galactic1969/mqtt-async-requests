@@ -25,6 +25,7 @@ export declare class MqttRequest implements IfMqttRequest {
     private isRequesting;
     constructor(connectOptions: Mqtt.IClientOptions);
     private setTimeout;
+    pingConnection(connectionTimeoutMilliseconds: number): Promise<void>;
     do(topic: string, appendUuid: boolean, responseTopicSuffix: string, payload: string | Buffer, qos: 0 | 1 | 2, requestTimeoutMilliseconds: number): Promise<Buffer>;
     doMany(topics: string[], appendUuid: boolean, responseTopicSuffix: string, payloads: (string | Buffer)[], qos: 0 | 1 | 2, requestTimeoutMilliseconds: number): Promise<Buffer[]>;
 }
